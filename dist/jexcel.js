@@ -1089,7 +1089,7 @@ var jexcel = (function(el, options) {
             obj.updateSelection(obj.records[cell[1]][cell[0]]);
 
             // Update table references
-            obj.updateTableReferences();
+            //obj.updateTableReferences();
 
             if (! ignoreHistoryAndEvents) {
                 obj.setHistory({
@@ -1166,7 +1166,7 @@ var jexcel = (function(el, options) {
             obj.updateSelection(obj.records[cell[1]][cell[0]], obj.records[cell[1]+j-1][cell[0]+i-1]);
 
             // Update table references
-            obj.updateTableReferences();
+            //obj.updateTableReferences();
 
             if (! keepOptions) {
                 delete(obj.options.mergeCells[cellName]);
