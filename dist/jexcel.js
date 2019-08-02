@@ -17,8 +17,8 @@ if (! jSuites && typeof(require) === 'function') {
 
 var jexcel = (function(el, options) {
     // Create jexcel object
-    var obj = {};
-    obj.options = {};
+    var obj = { options: {} };
+    el.jexcel = obj;
 
     // Loading default configuration
     var defaults = {
@@ -104,7 +104,7 @@ var jexcel = (function(el, options) {
         tableHeight:'300px',
         tableWidth:null,
         // Meta
-        meta: null,
+        meta: {},
         // Style
         style:null,
         // Event handles
@@ -131,7 +131,9 @@ var jexcel = (function(el, options) {
         onfocus:null,
         onblur:null,
         // Customize any cell behavior
-        updateTable:null,
+        updateCell:null,
+        // Custom cells editors
+        editors: {},
         // Texts
         text:{
             noRecordsFound: 'No records found',
@@ -157,6 +159,7 @@ var jexcel = (function(el, options) {
             paste: 'Paste...',
             saveAs: 'Save as...',
             about: 'About',
+            noActions: 'No actions',
             areYouSureToDeleteTheSelectedRows: 'Are you sure to delete the selected rows?',
             areYouSureToDeleteTheSelectedColumns: 'Are you sure to delete the selected columns?',
             thisActionWillDestroyAnyExistingMergedCellsAreYouSure: 'This action will destroy any existing merged cells. Are you sure?',
@@ -210,7 +213,7 @@ var jexcel = (function(el, options) {
     obj.selectedCell = null;
     obj.selectedContainer = null;
     obj.style = [];
-    obj.meta = [];
+    obj.meta = {};
     obj.data = null;
 
     // Internal controllers
@@ -674,8 +677,8 @@ var jexcel = (function(el, options) {
         var py = 0;
 
         // Column and row length
-        var x = obj.options.data[0].length
-        var y = obj.options.data.length
+        var x = obj.options.data[0].length;
+        var y = obj.options.data.length;
 
         // Go through the columns to get the data
         for (var j = 0; j < y; j++) {
@@ -1285,6 +1288,7 @@ var jexcel = (function(el, options) {
         // Get cell position
         var y = cell.getAttribute('data-y');
         var x = cell.getAttribute('data-x');
+        var cellName = jexcel.getColumnNameFromId([x, y]);
 
         // Overflow
         if (x > 0) {
@@ -1318,9 +1322,12 @@ var jexcel = (function(el, options) {
             obj.edition = [ obj.records[y][x], obj.records[y][x].innerHTML, x, y ];
 
             // If there is a custom editor for it
-            if (obj.options.columns[x].editor) {
-                // Custom editors
-                obj.options.columns[x].editor.openEditor(cell, el);
+            if (obj.options.editors[cellName]) {
+                // Cell editor
+                obj.options.editors[cellName].openEditor(cell, empty, e);
+            } else if (obj.options.columns[x].editor) {
+                // Column editor
+                obj.options.columns[x].editor.openEditor(cell, empty, e);
             } else {
                 // Native functions
                 if (obj.options.columns[x].type == 'hidden') {
@@ -1440,12 +1447,16 @@ var jexcel = (function(el, options) {
     obj.closeEditor = function(cell, save) {
         var x = parseInt(cell.getAttribute('data-x'));
         var y = parseInt(cell.getAttribute('data-y'));
+        var cellName = jexcel.getColumnNameFromId([x, y]);
 
         // Get cell properties
         if (save == true) {
             // If custom editor
-            if (obj.options.columns[x].editor) {
-                // Custom editor
+            if (obj.options.editors[cellName]) {
+                // Cell editor
+                var value = obj.options.editors[cellName].closeEditor(cell, save);
+            } else if (obj.options.columns[x].editor) {
+                // Custom column editor
                 var value = obj.options.columns[x].editor.closeEditor(cell, save);
             } else {
                 // Native functions
@@ -1496,8 +1507,11 @@ var jexcel = (function(el, options) {
             obj.ignoreEvents = ignoreEvents;
             obj.ignoreHistory = ignoreHistory;
         } else {
-            if (obj.options.columns[x].editor) {
-                // Custom editor
+            if (obj.options.editors[cellName]) {
+                // Cell editor
+                obj.options.editors[cellName].closeEditor(cell, el);
+            } else if (obj.options.columns[x].editor) {
+                // Custom column editor
                 obj.options.columns[x].editor.closeEditor(cell, save);
             } else {
                 if (obj.options.columns[x].type == 'dropdown' || obj.options.columns[x].type == 'autocomplete') {
@@ -1658,9 +1672,15 @@ var jexcel = (function(el, options) {
                 row: y,
                 newValue: value,
                 oldValue: obj.options.data[y][x],
-            }
+            };
 
-            if (obj.options.columns[x].editor) {
+            var cellName = jexcel.getColumnNameFromId([x, y]);
+
+            if (obj.options.editors[cellName]) {
+                // Cell editor
+                obj.options.data[y][x] = value;
+                obj.options.editors[cellName].setValue(obj.records[y][x], value, force);
+            } else if (obj.options.columns[x].editor) {
                 // Update data and cell
                 obj.options.data[y][x] = value;
                 obj.options.columns[x].editor.setValue(obj.records[y][x], value, force);
@@ -2029,7 +2049,7 @@ var jexcel = (function(el, options) {
         obj.selectedCell = [x1, y1, x2, y2];
 
         // Select cells
-        if (x1 != null) {
+        if (x1 != null && obj.records[y1]) {
             // Add selected cell
             obj.records[y1][x1].classList.add('highlight-selected')
 
@@ -3222,7 +3242,7 @@ var jexcel = (function(el, options) {
     obj.deleteRow = function(rowNumber, numOfRows) {
         // Global Configuration
         if (obj.options.allowDeleteRow == true) {
-            if (obj.options.data.length > 1) {
+            if (obj.options.data.length > 0) {
                 // Delete row definitions
                 if (rowNumber == undefined) {
                     var number = obj.getSelectedRows();
@@ -3944,10 +3964,10 @@ var jexcel = (function(el, options) {
         }
 
         // Customizations by the developer
-        if (typeof(obj.options.updateTable) == 'function') {
+        if (typeof(obj.options.updateCell) == 'function') {
             for (var j = 0; j < obj.rows.length; j++) {
                 for (var i = 0; i < obj.headers.length; i++) {
-                    obj.options.updateTable(el, obj.records[j][i], i, j, obj.options.data[j][i], obj.records[j][i].innerText, jexcel.getColumnNameFromId([i, j]));
+                    obj.options.updateCell(el, obj.records[j][i], i, j, obj.options.data[j][i], obj.records[j][i].innerText, jexcel.getColumnNameFromId([i, j]));
                 }
             }
         }
@@ -5695,7 +5715,7 @@ var jexcel = (function(el, options) {
                     items.push({
                         title:obj.options.text.deleteSelectedColumns,
                         onclick:function() {
-                            obj.deleteColumn();
+                            obj.deleteColumn(obj.getSelectedColumns().length ? undefined : parseInt(x));
                         }
                     });
                 }
@@ -5750,7 +5770,7 @@ var jexcel = (function(el, options) {
                     items.push({
                         title:obj.options.text.deleteSelectedRows,
                         onclick:function() {
-                            obj.deleteRow();
+                            obj.deleteRow(obj.getSelectedRows().length ? undefined : parseInt(y));
                         }
                     });
                 }
@@ -5780,20 +5800,20 @@ var jexcel = (function(el, options) {
                 }
             }
 
-            // Line
-            items.push({ type:'line' });
-
-            // Copy
-            items.push({
-                title:obj.options.text.copy,
-                shortcut:'Ctrl + C',
-                onclick:function() {
-                    obj.copy(true);
-                }
-            });
-
             // Paste
             if (navigator && navigator.clipboard) {
+                // Line
+                items.push({ type:'line' });
+
+                // Copy
+                items.push({
+                    title:obj.options.text.copy,
+                    shortcut:'Ctrl + C',
+                    onclick:function() {
+                        obj.copy(true);
+                    }
+                });
+
                 items.push({
                     title:obj.options.text.paste,
                     shortcut:'Ctrl + V',
@@ -5871,8 +5891,6 @@ var jexcel = (function(el, options) {
     el.addEventListener("mousewheel", obj.scrollControls);
 
     obj.init();
-
-    el.jexcel = obj;
 
     return obj;
 });
@@ -6196,22 +6214,22 @@ jexcel.keyDownControls = function(e) {
                                             e.preventDefault();
                                         } else {
                                             // Start edition
-                                            jexcel.current.openEditor(jexcel.current.records[rowId][columnId], true);
+                                            jexcel.current.openEditor(jexcel.current.records[rowId][columnId], true, e);
                                         }
+                                    } else if (e.keyCode == 113) {
+                                        // Start edition with current content F2
+                                        jexcel.current.openEditor(jexcel.current.records[rowId][columnId], false, e);
                                     } else if ((e.keyCode == 8) ||
                                                (e.keyCode >= 48 && e.keyCode <= 57) ||
                                                (e.keyCode >= 65 && e.keyCode <= 90) ||
                                                (e.keyCode >= 96 && e.keyCode <= 122) ||
                                                (e.keyCode >= 187 && e.keyCode <= 190)) {
                                         // Start edition
-                                        jexcel.current.openEditor(jexcel.current.records[rowId][columnId], true);
+                                        jexcel.current.openEditor(jexcel.current.records[rowId][columnId], true, e);
                                         // Prevent entries in the calendar
                                         if (jexcel.current.options.columns[columnId].type == 'calendar') {
                                             e.preventDefault();
                                         }
-                                    } else if (e.keyCode == 113) {
-                                        // Start edition with current content F2
-                                        jexcel.current.openEditor(jexcel.current.records[rowId][columnId], false);
                                     }
                                 }
                             }
@@ -6839,6 +6857,9 @@ jexcel.contextMenuControls = function(e) {
                 if (x || y) {
                     // Table found
                     var items = jexcel.current.options.contextMenu(jexcel.current, x, y, e);
+                    if (!items.length) {
+                        items.push({ title: jexcel.current.options.text.noActions });
+                    }
                     // The id is depending on header and body
                     jexcel.current.contextMenu.contextmenu.open(e, items);
                     // Avoid the real one
