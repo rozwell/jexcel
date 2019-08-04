@@ -6601,7 +6601,7 @@ jexcel.mouseMoveControls = function(e) {
                     }
                 }
             }
-        } else {
+        }/* else {
             var x = e.target.getAttribute('data-x');
             var y = e.target.getAttribute('data-y');
             var rect = e.target.getBoundingClientRect();
@@ -6625,7 +6625,7 @@ jexcel.mouseMoveControls = function(e) {
                     e.target.style.cursor = 'move';
                 }
             }
-        }
+        }*/
     }
 }
 
