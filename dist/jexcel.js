@@ -677,8 +677,11 @@ var jexcel = (function(el, options) {
         var py = 0;
 
         // Column and row length
-        var x = obj.options.data[0].length;
         var y = obj.options.data.length;
+        if (!y) {
+            return dataset;
+        }
+        var x = obj.options.data[0].length;
 
         // Go through the columns to get the data
         for (var j = 0; j < y; j++) {
