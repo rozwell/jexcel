@@ -1327,7 +1327,7 @@ var jexcel = (function(el, options) {
             // If there is a custom editor for it
             if (obj.options.editors[cellName]) {
                 // Cell editor
-                obj.options.editors[cellName].openEditor(cell, empty, e);
+                obj.options.editors[cellName].editor.openEditor(cell, empty, e);
             } else if (obj.options.columns[x].editor) {
                 // Column editor
                 obj.options.columns[x].editor.openEditor(cell, empty, e);
@@ -1457,7 +1457,7 @@ var jexcel = (function(el, options) {
             // If custom editor
             if (obj.options.editors[cellName]) {
                 // Cell editor
-                var value = obj.options.editors[cellName].closeEditor(cell, save);
+                var value = obj.options.editors[cellName].editor.closeEditor(cell, save);
             } else if (obj.options.columns[x].editor) {
                 // Custom column editor
                 var value = obj.options.columns[x].editor.closeEditor(cell, save);
@@ -1512,7 +1512,7 @@ var jexcel = (function(el, options) {
         } else {
             if (obj.options.editors[cellName]) {
                 // Cell editor
-                obj.options.editors[cellName].closeEditor(cell, el);
+                obj.options.editors[cellName].editor.closeEditor(cell, el);
             } else if (obj.options.columns[x].editor) {
                 // Custom column editor
                 obj.options.columns[x].editor.closeEditor(cell, save);
@@ -1682,7 +1682,7 @@ var jexcel = (function(el, options) {
             if (obj.options.editors[cellName]) {
                 // Cell editor
                 obj.options.data[y][x] = value;
-                obj.options.editors[cellName].setValue(obj.records[y][x], value, force);
+                obj.options.editors[cellName].editor.setValue(obj.records[y][x], value, force);
             } else if (obj.options.columns[x].editor) {
                 // Update data and cell
                 obj.options.data[y][x] = value;
