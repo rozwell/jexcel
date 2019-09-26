@@ -11235,7 +11235,7 @@ jexcel.methods.math = (function() {
         return result;
     };
 
-    exports.PRODUCT = function() {
+    exports.ILOCZYN = function() {
         var args = utils.parseNumberArray(utils.flatten(arguments));
         if (args instanceof Error) {
             return args;
@@ -11524,7 +11524,7 @@ jexcel.methods.math = (function() {
         return exports.POWER(base, exponent);
     };
 
-    exports.SUM = function() {
+    exports.SUMA = function() {
         var result = 0;
         var argsKeys = Object.keys(arguments);
         for (var i = 0; i < argsKeys.length; ++i) {
@@ -11535,7 +11535,7 @@ jexcel.methods.math = (function() {
                 var parsed = parseFloat(elt);
                 !isNaN(parsed) && (result += parsed);
             } else if (Array.isArray(elt)) {
-                result += exports.SUM.apply(null, elt);
+                result += exports.SUMA.apply(null, elt);
             }
         }
         return result;
@@ -11990,7 +11990,7 @@ jexcel.methods.stats = (function() {
 
     exports.AVEDEV = null;
 
-    exports.AVERAGE = function() {
+    exports.ŚREDNIA = function() {
         var range = utils.numbers(utils.flatten(arguments));
         var n = range.length;
         var sum = 0;
