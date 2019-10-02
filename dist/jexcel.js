@@ -1593,7 +1593,7 @@ var jexcel = (function(el, options) {
             records.push(obj.updateCell(x, y, value, force));
          } else {
             var keys = Object.keys(cell);
-            if (keys.length > 0) {
+            if (keys.length > 0 && cell[0] !== undefined) {
                 for (var i = 0; i < keys.length; i++) {
                     var x = cell[i].getAttribute('data-x');
                     var y = cell[i].getAttribute('data-y');
