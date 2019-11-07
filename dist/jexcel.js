@@ -1502,7 +1502,7 @@ var jexcel = (function(el, options) {
             if (obj.edition[1] == value) {
                 cell.innerHTML = obj.edition[1];
             } else {
-                obj.setValue(cell, value);
+                obj.setValue(cell, value, false, 'closeEditor');
             }
 
             // Restore events and history flag
@@ -1581,7 +1581,7 @@ var jexcel = (function(el, options) {
      * @param object value value
      * @return void
      */
-    obj.setValue = function(cell, value, force) {
+    obj.setValue = function(cell, value, force, action) {
         var records = [];
 
         if (typeof(cell) == 'string') {
@@ -1590,7 +1590,7 @@ var jexcel = (function(el, options) {
             var y = columnId[1];
 
             // Update cell
-            records.push(obj.updateCell(x, y, value, force));
+            records.push(obj.updateCell(x, y, value, force, action));
          } else {
             var keys = Object.keys(cell);
             if (keys.length > 0 && cell[0] !== undefined) {
@@ -1599,14 +1599,14 @@ var jexcel = (function(el, options) {
                     var y = cell[i].getAttribute('data-y');
 
                     // Update cell
-                    records.push(obj.updateCell(x, y, value, force));
+                    records.push(obj.updateCell(x, y, value, force, action));
                 }
             } else {
                 var x = cell.getAttribute('data-x');
                 var y = cell.getAttribute('data-y');
 
                 // Update cell
-                records.push(obj.updateCell(x, y, value, force));
+                records.push(obj.updateCell(x, y, value, force, action));
             }
         }
 
@@ -1656,7 +1656,7 @@ var jexcel = (function(el, options) {
      * @param object cell
      * @return void
      */
-    obj.updateCell = function(x, y, value, force) {
+    obj.updateCell = function(x, y, value, force, action) {
         // Changing value depending on the column type
         if (obj.records[y][x].classList.contains('readonly') == true && ! force) {
             // Do nothing
@@ -1664,7 +1664,7 @@ var jexcel = (function(el, options) {
             // On change
             if (! obj.ignoreEvents) {
                 if (typeof(obj.options.onbeforechange) == 'function') {
-                    obj.options.onbeforechange(el, obj.records[y][x], x, y, value);
+                    obj.options.onbeforechange(el, obj.records[y][x], x, y, value, action);
                 }
             }
 
@@ -1681,11 +1681,11 @@ var jexcel = (function(el, options) {
             if (obj.options.editors[cellName]) {
                 // Cell editor
                 obj.options.data[y][x] = value;
-                obj.options.editors[cellName].editor.setValue(obj.records[y][x], value, force);
+                obj.options.editors[cellName].editor.setValue(obj.records[y][x], value, force, action);
             } else if (obj.options.columns[x].editor) {
                 // Update data and cell
                 obj.options.data[y][x] = value;
-                obj.options.columns[x].editor.setValue(obj.records[y][x], value, force);
+                obj.options.columns[x].editor.setValue(obj.records[y][x], value, force, action);
             } else {
                 // Native functions
                 if (obj.options.columns[x].type == 'checkbox' || obj.options.columns[x].type == 'radio') {
@@ -1772,7 +1772,7 @@ var jexcel = (function(el, options) {
             // On change
             if (! obj.ignoreEvents) {
                 if (typeof(obj.options.onchange) == 'function') {
-                    obj.options.onchange(el, obj.records[y][x], x, y, value);
+                    obj.options.onchange(el, obj.records[y][x], x, y, value, action);
                 }
             }
         }
@@ -6145,7 +6145,7 @@ jexcel.keyDownControls = function(e) {
                         }
                     } else {
                         // Change value
-                        jexcel.current.setValue(jexcel.current.highlighted, '');
+                        jexcel.current.setValue(jexcel.current.highlighted, '', false, 'delete');
                     }
                 }
             } else if (e.which == 13) {
