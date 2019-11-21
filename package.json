@@ -35,7 +35,7 @@
         "data-spreadsheet"
     ],
     "dependencies": {
-        "jsuites": "^2.2.2"
+        "jsuites": "https://github.com/rozwell/jsuites.git#production"
     },
     "main": "dist/jexcel.js",
     "version": "3.3.5",
