@@ -15,7 +15,7 @@
     display:inline-block;
     padding-right:2px;
     box-sizing: border-box;
-    overscroll-behavior: contain;
+    /*overscroll-behavior: contain;*/ /* not offical, yet */
 }
 
 .jexcel_container.fullscreen {
