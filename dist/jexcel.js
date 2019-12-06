@@ -124,6 +124,8 @@ var jexcel = (function(el, options) {
         onresizecolumn:null,
         onsort:null,
         onselection:null,
+        onBeforeCellDoubleClick:null,
+        onAfterCellDoubleClick:null,
         onpaste:null,
         onmerge:null,
         onremovemerge:null,
@@ -6785,7 +6787,7 @@ jexcel.doubleClickControls = function(e) {
             }
 
             // Double click over body
-            if (jexcelTable[1] == 2 && jexcel.current.options.editable == true) {
+            if (jexcelTable[1] == 2) {
                 if (! jexcel.current.edition) {
                     var getCellCoords = function(element) {
                         if (element.parentNode) {
@@ -6798,9 +6800,20 @@ jexcel.doubleClickControls = function(e) {
                             }
                         }
                     }
+
                     var cell = getCellCoords(e.target);
                     if (cell && cell.classList.contains('highlight')) {
-                        jexcel.current.openEditor(cell);
+                        if (typeof(jexcel.current.options.onBeforeCellDoubleClick) == 'function') {
+                            jexcel.current.options.onBeforeCellDoubleClick(jexcel.current, cell);
+                        }
+
+                        if(jexcel.current.options.editable == true){
+                            jexcel.current.openEditor(cell);
+                        }
+
+                        if (typeof(jexcel.current.options.onAfterCellDoubleClick) == 'function') {
+                            jexcel.current.options.onAfterCellDoubleClick(jexcel.current, cell);
+                        }
                     }
                 }
             }
