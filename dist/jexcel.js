@@ -37,6 +37,7 @@ var jexcel = (function(el, options) {
         nestedHeaders:null,
         // Column width that is used by default
         defaultColWidth:50,
+        disableColWidth:false,
         // Spare rows and columns
         minSpareRows:0,
         minSpareCols:0,
@@ -432,7 +433,9 @@ var jexcel = (function(el, options) {
         obj.table.setAttribute('cellspacing', '0');
         obj.table.setAttribute('unselectable', 'yes');
         obj.table.setAttribute('onselectstart', 'return false');
-        obj.table.appendChild(obj.colgroupContainer);
+        if (!obj.options.disableColWidth) {
+            obj.table.appendChild(obj.colgroupContainer);
+        }
         obj.table.appendChild(obj.thead);
         obj.table.appendChild(obj.tbody);
 
