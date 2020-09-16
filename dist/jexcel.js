@@ -36,6 +36,7 @@ var jexcel = (function(el, options) {
         colAlignments:[],
         nestedHeaders:null,
         // Column width that is used by default
+        rowNumbersColWidth:50,
         defaultColWidth:50,
         disableColWidth:false,
         // Spare rows and columns
@@ -395,7 +396,7 @@ var jexcel = (function(el, options) {
         // Colsgroup
         obj.colgroupContainer = document.createElement('colgroup');
         var tempCol = document.createElement('col');
-        tempCol.setAttribute('width', 50);
+        tempCol.setAttribute('width', obj.options.rowNumbersColWidth || 50);
         obj.colgroupContainer.appendChild(tempCol);
 
         // Nested
