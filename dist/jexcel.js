@@ -11261,7 +11261,7 @@ jexcel.methods.math = (function() {
         for (var i = 0; i < args.length; i++) {
             result *= args[i];
         }
-        return result;
+        return Math.round((result + Number.EPSILON) * 10000) / 10000; // fix floating point issues
     };
 
     exports.QUOTIENT = function(numerator, denominator) {
@@ -11555,7 +11555,7 @@ jexcel.methods.math = (function() {
                 result += exports.SUMA.apply(null, elt);
             }
         }
-        return result;
+        return Math.round((result + Number.EPSILON) * 10000) / 10000; // fix floating point issues
     };
 
     exports.SUMIF = function(range, criteria) {
@@ -12016,7 +12016,7 @@ jexcel.methods.stats = (function() {
             sum += range[i];
             count += 1;
         }
-        return sum / count;
+        return Math.round((sum / count + Number.EPSILON) * 10000) / 10000; // fix floating point issues
     };
 
     exports.AVERAGEA = function() {
