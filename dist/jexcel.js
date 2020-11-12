@@ -108,6 +108,8 @@ var jexcel = (function(el, options) {
         meta: {},
         // Style
         style:null,
+        // Enable paste
+        paste: true,
         // Event handles
         onload:null,
         onchange:null,
@@ -6845,7 +6847,7 @@ jexcel.cutControls = function(e) {
 }
 
 jexcel.pasteControls = function(e) {
-    if (jexcel.current && jexcel.current.selectedCell) {
+    if (jexcel.current && jexcel.current.selectedCell && jexcel.current.options.paste) {
         if (! jexcel.current.edition) {
             if (e.clipboardData) {
                 if (jexcel.current.options.editable == true) {
